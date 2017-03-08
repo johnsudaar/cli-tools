@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -e
+
+prompt_confirm() {
+  while true; do
+    read -r -n 1 -p "${1:-Continue?} [y/n]: " REPLY
+    case $REPLY in
+      [yY]) echo ; return 0 ;;
+      [nN]) echo ; return 1 ;;
+      *) printf " \033[31m %s \n\033[0m" "invalid input"
+    esac 
+  done  
+}
+
+if [[ $# -ne 2 ]]; then
+    echo "Usage: $0 [Issue type] [Issue id]"
+    exit 1
+fi
+
+git status 2>/dev/null 1>/dev/null
+
+if [[ $? -ne 0 ]]; then
+    echo "Not a valid git repository"
+    exit 1
+fi
+
+type=$1
+issueid=$2
+
+for file in $(git status --porcelain | rev | cut -d' ' -f1 | rev)
+do
+    prompt_confirm "Commit file $file ?" && git add $file
+done
+
+git checkout -b fix/$issueid
+echo "$type#$issueid" > /tmp/$type$issueid.txt
+nvim /tmp/$type$issueid.txt
+git commit -F /tmp/$type$issueid.txt 
+git push origin fix/$issueid
+hub pull-request
