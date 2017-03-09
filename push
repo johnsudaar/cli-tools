@@ -30,11 +30,11 @@ issueid=$2
 
 for file in $(git status --porcelain | rev | cut -d' ' -f1 | rev)
 do
-    prompt_confirm "Commit file $file ?" && git add $file
+    prompt_confirm "Commit file $file?" && git add $file
 done
 
 git checkout -b fix/$issueid
-echo "$type#$issueid" > /tmp/$type$issueid.txt
+echo "fix #$issueid" > /tmp/$type$issueid.txt
 nvim /tmp/$type$issueid.txt
 git commit -F /tmp/$type$issueid.txt 
 git push origin fix/$issueid
