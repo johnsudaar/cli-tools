@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+if [[ $# -ne 2 ]] ; then
+   echo "Usage: $0 [METHOD] [ENDPOINT]" >&2
+   exit 1
+fi
+
+if [ -z "$AUTH_TOKEN" ]; then
+    echo "Could not find AUTH_TOKEN" >&2
+    exit 1
+fi
+
+if [ -z "$SCALINGO_API" ]; then
+    SCALINGO_API="https://api.scalingo.com/v1/"
+fi
+
+METHOD=$1
+ENDPOINT=$2
+if [[ $1 ==  "POST" ]]; then
+    rm /tmp/scal_api.txt 2>&1 >/dev/null
+    nvim /tmp/scal_api.txt
+    result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" -u :$AUTH_TOKEN \
+        -X POST $SCALINGO_API/$ENDPOINT -d @/tmp/scal_api.txt)
+else
+    result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" -u :$AUTH_TOKEN \
+        -X GET $SCALINGO_API/$ENDPOINT)
+fi
+
+echo $result | python -m json.tool 2>/dev/null || echo $result
