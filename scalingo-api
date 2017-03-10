@@ -7,13 +7,40 @@ if [[ $# -ne 2 ]] ; then
    exit 1
 fi
 
-if [ -z "$AUTH_TOKEN" ]; then
-    echo "Could not find AUTH_TOKEN" >&2
-    exit 1
-fi
 
 if [ -z "$SCALINGO_API" ]; then
     SCALINGO_API="https://api.scalingo.com/v1/"
+fi
+
+if [ -z "$AUTH_TOKEN" ]; then
+    echo "Could not find AUTH_TOKEN, asking for credentials" >&2
+    read -p "Username: " username
+    read -p "Password: " -s password
+    echo ""
+    
+    result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" \
+        -X POST $SCALINGO_API/users/sign_in -d \
+ "{
+   \"user\": {
+     \"login\": \"$username\",
+     \"password\": \"$password\"
+   }
+ }
+ ")
+    AUTH_TOKEN=$(echo $result | jq -r .authentication_token)
+
+    if [[ $AUTH_TOKEN == "null" ]]; then
+        echo "Invalid credentials" >&2
+        exit 1
+    fi
+
+    ok=$(echo $SCALINGO_API | grep "localhost" | wc -l)
+
+    if [[ $ok == 1 ]] ; then 
+        echo "You are in your dev environment, you could set these variables:"
+        echo "export SCALINGO_API=$SCALINGO_API"
+        echo "export AUTH_TOKEN=$AUTH_TOKEN"
+    fi
 fi
 
 METHOD=$1
@@ -28,4 +55,4 @@ else
         -X GET $SCALINGO_API/$ENDPOINT)
 fi
 
-echo $result | python -m json.tool 2>/dev/null || echo $result
+echo $result | python -m json.tool 2>/dev/null || echo $result 
