@@ -17,7 +17,7 @@ if [ -z "$AUTH_TOKEN" ]; then
     read -p "Username: " username
     read -p "Password: " -s password
     echo ""
-    
+
     result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" \
         -X POST $SCALINGO_API/users/sign_in -d \
  "{
@@ -36,7 +36,7 @@ if [ -z "$AUTH_TOKEN" ]; then
 
     ok=$(echo $SCALINGO_API | grep "localhost" | wc -l)
 
-    if [[ $ok == 1 ]] ; then 
+    if [[ $ok == 1 ]] ; then
         echo "You are in your dev environment, you could set these variables:"
         echo "export SCALINGO_API=$SCALINGO_API"
         echo "export AUTH_TOKEN=$AUTH_TOKEN"
@@ -45,14 +45,14 @@ fi
 
 METHOD=$1
 ENDPOINT=$2
-if [[ $1 ==  "POST" ]]; then
-    rm /tmp/scal_api.txt 2>&1 >/dev/null
-    nvim /tmp/scal_api.txt
-    result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" -u :$AUTH_TOKEN \
-        -X POST $SCALINGO_API/$ENDPOINT -d @/tmp/scal_api.txt)
-else
+if [[ "$METHOD" == "GET" ]]; then
     result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" -u :$AUTH_TOKEN \
         -X GET $SCALINGO_API/$ENDPOINT)
+else
+    rm /tmp/scal_api.txt 2>&1 >/dev/null || true
+    nvim /tmp/scal_api.txt
+    result=$(curl -s -H "Accept: application/json" -H "Content-Type: application/json" -u :$AUTH_TOKEN \
+        -X $METHOD $SCALINGO_API/$ENDPOINT -d @/tmp/scal_api.txt)
 fi
 
-echo $result | python -m json.tool 2>/dev/null || echo $result 
+echo $result | python -m json.tool 2>/dev/null || echo $result
