@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Switch all projects in a directory to the master branch
+# Especially usefull after the godep restore made a mess in all your dependencies
+
+if [ $# -ne 1 ]; then
+  echo "Usage $0 directory" 1>&2
+  exit 1
+fi
+
+pushd $1 > /dev/null
+if [ $? -ne 0 ]; then
+  echo "Unable to change directory" 1>&2
+  exit 2
+fi
+
+for dir in $( ls -R) ; do
+  dir=$(echo $dir | tr -d ':')
+  if [ -d $dir ]; then
+    if [ -d $dir/.git ]; then
+      pushd $dir > /dev/null
+      branch=$(git rev-parse --abbrev-ref HEAD)
+      if [ "$branch" != "master" ] ; then
+        echo "Switching $dir to master"
+        if [[ `git status --porcelain | wc -l` -eq 0 ]] ; then
+          git checkout master > /dev/null 2>&1
+        else
+          echo "Error: Repo dirty"
+        fi
+      fi
+      popd > /dev/null
+    fi
+  fi
+done
+
+popd > /dev/null
