@@ -1,0 +1,14 @@
+#!/bin/bash
+
+while true; do
+  deps=$(godep save ./... 2>&1 | tail -n 1)
+  echo $deps | grep 'not found' >/dev/null
+
+  if [ $? -eq 0 ] ; then
+    dep_name=$(echo $deps | cut -d'(' -f2 | cut -d')' -f1)
+    echo "$dep_name"
+    go get $dep_name
+  else
+    exit 0
+  fi
+done
