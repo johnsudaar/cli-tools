@@ -1,0 +1,8 @@
+#!/bin/sh
+
+current_balance=$(cat $HOME/.bar_balance)
+new_balance=$(expr $current_balance - 2)
+echo $new_balance > $HOME/.bar_balance
+echo "$(date) Consumed 1 item ($new_balance)" >> $HOME/.bar_history
+
+echo "Current balance: $new_balance"

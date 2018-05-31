@@ -1,0 +1,3 @@
+#!/bin/bash
+
+less $HOME/.bar_history

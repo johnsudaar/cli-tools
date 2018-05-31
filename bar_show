@@ -1,0 +1,4 @@
+#!/bin/sh
+
+current_balance=$(cat $HOME/.bar_balance)
+echo "Current balance: $current_balance"

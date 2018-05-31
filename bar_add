@@ -1,0 +1,8 @@
+#!/bin/sh
+
+current_balance=$(cat $HOME/.bar_balance)
+new_balance=$(expr $current_balance + $1)
+echo $new_balance > $HOME/.bar_balance
+echo "$(date) Added $1€ ($new_balance)" >> $HOME/.bar_history
+
+echo "Current balance: $new_balance"
