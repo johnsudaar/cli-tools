@@ -1,0 +1,14 @@
+if [ $# -ne 1 ] ; then
+  echo "Usage: $0 URL" >&2
+  exit 1
+fi
+
+URL=$1
+
+for i in $(seq 1 10); do
+  echo
+  echo -n "SEQ ${i} "
+  for j in $(seq 1 100); do
+    curl "${URL}/customers$i/external/${j}" -f -k -d "{\"name\": \"John Doe\", \"i\": \"$i\", \"j\": \"$j\"}" >/dev/null -s && echo -n "." || echo -n "!"
+  done
+done
